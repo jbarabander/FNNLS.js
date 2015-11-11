@@ -20,7 +20,6 @@
 	subject to the constraint that 0 <= di for all  0 <= i <= M 
 */
 
-var numeric = require('numeric');
 var math = require('mathjs');
 
 
