@@ -1,0 +1,19 @@
+{
+  "name": "fnnls",
+  "version": "1.0.0",
+  "description": "fast non-negative least squares algorithm",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jbarabander/FNNLS.js.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jbarabander/FNNLS.js/issues"
+  },
+  "homepage": "https://github.com/jbarabander/FNNLS.js#readme"
+}
