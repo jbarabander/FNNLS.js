@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/jbarabander/FNNLS.js/issues"
   },
-  "homepage": "https://github.com/jbarabander/FNNLS.js#readme"
+  "homepage": "https://github.com/jbarabander/FNNLS.js#readme",
+  "dependencies": {
+    "mathjs": "^2.4.1"
+  }
 }
