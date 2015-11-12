@@ -51,16 +51,11 @@ function NNLS(independentMatrix, dependentVector, tolerance) {
 	var startingPassiveMatrix = math.matrix(math.zeros(coefficients.size()));
 	var rowRange = arrayMath.range(0, coefficients.size()[0]);
 	while(activeSet.length && maxActiveMultiplier > tolerance) {
-		// console.log(activeSet[activeSet.indexOf(indexOfMax)]);
 		passiveSet.push(activeSet.splice(activeSet.indexOf(indexOfMax),1)[0]);
 		var columnIndex = passiveSet.length === 1 ? passiveSet[0] : passiveSet;
 		var coefficientsP = startingPassiveMatrix.subset(math.index(rowRange, columnIndex),coefficients.subset(math.index(rowRange, columnIndex)));
 		var tCoefficientsP = math.transpose(coefficientsP);
 		var pseudoInv = pInv(coefficientsP.valueOf());
-		console.log('inverse check',numeric.dot(pseudoInv, coefficientsP.valueOf()));
-		console.log('stuff', numeric.dot(pseudoInv, dependentVector));
-		// var pInv = numeric.dot(numeric.transpose(U), numeric.dot(numeric.diag(sInv), numeric.transpose(V)));
-		// console.log('other thing',numeric.dot(pseudoInv, numeric.dot(tCoefficientsP.valueOf(), dependentVector)));
 		var sP = numeric.dot(pseudoInv, dependentVector);
 		console.log(sP);
 		while(math.min(sP.filter(function(element, index) {
@@ -70,7 +65,6 @@ function NNLS(independentMatrix, dependentVector, tolerance) {
 			// 	return regressors.valueOf()[element] / (regressors.valueOf()[element] - sP[element]);
 			// }));
 			// regressors = numeric.dot(alpha, numeric.sub(sP, regressors.valueOf()));
-			console.log('in inner loop');
 			break;
 		}
 		regressors = sP;
@@ -83,7 +77,6 @@ function NNLS(independentMatrix, dependentVector, tolerance) {
 			indexOfMax = multipliers.valueOf().indexOf(maxActiveMultiplier);	
 		}
 	}
-	console.log('regressors',regressors);
 	return regressors;
 }
 
@@ -116,7 +109,7 @@ function pInv(matrix) {
 // }
 
 // NNLS([[1,5,2,9,6], [6,1,8,2,6], [2,4,2,5,7], [2,12,6,4,3], [12,19,3,5,10]], [1,11,20,12,34]);
-NNLS([[2,-1], [-1,2], [-1,-1]], [-4,-9,-16]);
+// NNLS([[2,-1], [-1,2], [-1,-1]], [-4,-9,-16]);
 //FNNLS algorithm
 function FNNLS(coefficientMatrix, dependentVector) {
 
