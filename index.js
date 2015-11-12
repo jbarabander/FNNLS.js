@@ -52,20 +52,23 @@ function NNLS(independentMatrix, dependentVector, tolerance) {
 	var columnRange = arrayMath.range(0, coefficients.size()[0]);
 
 	while(activeSet.length && maxActiveMultiplier > tolerance) {
-		console.log(multipliers);
+		// console.log(multipliers);
 		passiveSet = passiveSet.concat(activeSet.splice(indexOfMax,1));
 		coefficientsP = coefficientsP.subset(math.index(columnRange, indexOfMax),coefficients.subset(math.index(columnRange, indexOfMax)));
 		var tCoefficientsP = math.transpose(coefficientsP),
 		//FIXME: need to fix this later to make sure that if we already have more rows than columns we use the original and not the transpose
 		 z = numeric.svd(tCoefficientsP.valueOf()), U = z.U, S = z.S, V = z.V, sInv = [];
+		 console.log(z);
 		var sInv = new Array(S.length);
 		for(var i = 0; i < S.length; i++) {
 			if(S[i] > tolerance) sInv[i] = 1 / S[i];
 			else sInv[i] = 0;
 		}
 		var pInv = numeric.dot(numeric.transpose(U), numeric.dot(numeric.diag(sInv), numeric.transpose(V)));
+		// console.log(pInv);
 		var sP = numeric.dot(numeric.dot(pInv, tCoefficientsP.valueOf()), dependentVector);
 		// while(math.min(sP) < 0) {
+		// console.log(sP);
 		while(math.min(sP.filter(function(element, index) {
 			return passiveSet.indexOf(index) !== -1;
 		})) <= 0) {
@@ -82,6 +85,7 @@ function NNLS(independentMatrix, dependentVector, tolerance) {
 		maxActiveMultiplier = math.max(activeMultipliers);
 		indexOfMax = activeMultipliers.valueOf().indexOf(maxActiveMultiplier);
 		console.log(multipliers);
+		console.log('regressors',regressors);
 	}
 }
 
@@ -94,7 +98,7 @@ function NNLS(independentMatrix, dependentVector, tolerance) {
 //   return numeric.dot(numeric.dot(V,numeric.diag(Sinv)),numeric.transpose(U))
 // }
 
-NNLS([[1,2,5], [3,6,9], [4,9,12]], [1,4, 7], 0.05);
+NNLS([[1,5,2,9,6], [6,1,8,2,6], [2,4,2,5,7], [2,12,6,4,3], [12,19,3,5,10]], [1,11,20,12,34]);
 
 //FNNLS algorithm
 function FNNLS(coefficientMatrix, dependentVector) {
