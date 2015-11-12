@@ -28,13 +28,12 @@ var arrayMath = math.create({
 	matrix: 'array'
 });
 
-var EPSILON = Math.pow(2, -52);
 
 
 //basic NNLS algorithm
 function NNLS(independentMatrix, dependentVector, tolerance) {
 	if(tolerance === undefined) {
-		tolerance = math.max(math.size(independentMatrix)) * math.norm(independentMatrix, 1) * EPSILON;
+		tolerance = math.max(math.size(independentMatrix)) * math.norm(independentMatrix, 1) * numeric.epsilon;
 	}
 	if(typeof tolerance !== 'number') throw new Error('tolerance level needs to be a number but instead got: ' + typeof tolerance);
 	if(tolerance < 0) throw new Error('tolerance level needs to be greater than 0');
@@ -55,20 +54,28 @@ function NNLS(independentMatrix, dependentVector, tolerance) {
 	while(activeSet.length && maxActiveMultiplier > tolerance) {
 		passiveSet = passiveSet.concat(activeSet.splice(indexOfMax,1));
 		coefficientsP = coefficientsP.subset(math.index(columnRange, indexOfMax),coefficients.subset(math.index(columnRange, indexOfMax)));
-		var tCoefficientsP = math.transpose(coefficientsP);
-		var z = numeric.svd(tCoefficientsP.valueOf());
-		var U = z.U, S = z.S, V = z.V;
-		var sInv = [];
+		var tCoefficientsP = math.transpose(coefficientsP),
+		//FIXME: need to fix this later to make sure that if we already have more rows than columns we use the original and not the transpose
+		 z = numeric.svd(tCoefficientsP.valueOf()), U = z.U, S = z.S, V = z.V, sInv = [];
 		var sInv = new Array(S.length);
 		for(var i = 0; i < S.length; i++) {
 			if(S[i] > tolerance) sInv[i] = 1 / S[i];
 			else sInv[i] = 0;
 		}
-		// console.log(sInv);
-		var coefficientsP_SVD = numeric.dot(numeric.dot(V, numeric.transpose(numeric.diag(S))), numeric.transpose(U));
 		var pInv = numeric.dot(numeric.transpose(U), numeric.dot(numeric.diag(sInv), numeric.transpose(V)));
-		console.log(numeric.dot(pInv, coefficientsP.valueOf()));
-		break;
+		var sP = numeric.dot(numeric.dot(pInv, tCoefficientsP.valueOf()), dependentVector);
+		// while(math.min(sP) < 0) {
+		while(math.min(sP.filter(function(element, index) {
+			return passiveSet.indexOf(index) !== -1;
+		})) <= 0) {
+			// var sigma = - math.min(passiveSet.map(function(element) {
+			// 	return regressors.valueOf()[element] / (regressors.valueOf()[element] - sP[element]);
+			// }));
+			// regressors = numeric.dot(sigma, numeric.sub(sP, regressors.valueOf()));
+			console.log('in inner loop');
+			break;
+		}
+		var regressors = sP;
 	}
 }
 
