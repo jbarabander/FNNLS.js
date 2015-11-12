@@ -52,6 +52,7 @@ function NNLS(independentMatrix, dependentVector, tolerance) {
 	var columnRange = arrayMath.range(0, coefficients.size()[0]);
 
 	while(activeSet.length && maxActiveMultiplier > tolerance) {
+		console.log(multipliers);
 		passiveSet = passiveSet.concat(activeSet.splice(indexOfMax,1));
 		coefficientsP = coefficientsP.subset(math.index(columnRange, indexOfMax),coefficients.subset(math.index(columnRange, indexOfMax)));
 		var tCoefficientsP = math.transpose(coefficientsP),
@@ -75,7 +76,12 @@ function NNLS(independentMatrix, dependentVector, tolerance) {
 			console.log('in inner loop');
 			break;
 		}
-		var regressors = sP;
+		regressors = sP;
+		multipliers = math.multiply(math.transpose(coefficients), math.subtract(dependentVector, math.multiply(coefficients, regressors)));
+		activeMultipliers = math.subset(multipliers, math.index(activeSet));
+		maxActiveMultiplier = math.max(activeMultipliers);
+		indexOfMax = activeMultipliers.valueOf().indexOf(maxActiveMultiplier);
+		console.log(multipliers);
 	}
 }
 
