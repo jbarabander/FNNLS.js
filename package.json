@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/jbarabander/FNNLS.js#readme",
   "dependencies": {
-    "mathjs": "^2.4.1"
+    "mathjs": "^2.4.1",
+    "numeric": "^1.2.6"
   }
 }
