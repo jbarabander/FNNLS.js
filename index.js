@@ -50,7 +50,6 @@ function NNLS(independentMatrix, dependentVector, tolerance) {
 	var indexOfMax = multipliers.valueOf().indexOf(maxActiveMultiplier);
 	var startingPassiveMatrix = math.matrix(math.zeros(coefficients.size()));
 	var rowRange = arrayMath.range(0, coefficients.size()[0]);
-
 	while(activeSet.length && maxActiveMultiplier > tolerance) {
 		// console.log(activeSet[activeSet.indexOf(indexOfMax)]);
 		passiveSet.push(activeSet.splice(activeSet.indexOf(indexOfMax),1)[0]);
@@ -59,27 +58,30 @@ function NNLS(independentMatrix, dependentVector, tolerance) {
 		var tCoefficientsP = math.transpose(coefficientsP);
 		var pseudoInv = pInv(coefficientsP.valueOf());
 		console.log('inverse check',numeric.dot(pseudoInv, coefficientsP.valueOf()));
+		console.log('stuff', numeric.dot(pseudoInv, dependentVector));
 		// var pInv = numeric.dot(numeric.transpose(U), numeric.dot(numeric.diag(sInv), numeric.transpose(V)));
-		var sP = numeric.dot(numeric.dot(pseudoInv, tCoefficientsP.valueOf()), dependentVector);
+		// console.log('other thing',numeric.dot(pseudoInv, numeric.dot(tCoefficientsP.valueOf(), dependentVector)));
+		var sP = numeric.dot(pseudoInv, dependentVector);
+		console.log(sP);
 		while(math.min(sP.filter(function(element, index) {
 			return passiveSet.indexOf(index) !== -1;
 		})) <= 0) {
 			// var alpha = - math.min(passiveSet.map(function(element) {
 			// 	return regressors.valueOf()[element] / (regressors.valueOf()[element] - sP[element]);
 			// }));
-			// regressors = numeric.dot(sigma, numeric.sub(sP, regressors.valueOf()));
+			// regressors = numeric.dot(alpha, numeric.sub(sP, regressors.valueOf()));
 			console.log('in inner loop');
 			break;
 		}
 		regressors = sP;
 		multipliers = math.multiply(math.transpose(coefficients), math.subtract(dependentVector, math.multiply(coefficients, regressors)));
+		console.log(multipliers);
 		if(activeSet.length) {
 			activeMultipliers = math.subset(multipliers, math.index(activeSet));
 			maxActiveMultiplier = math.max(activeMultipliers);
 			// console.log('maxActiveMultiplier', maxActiveMultiplier);
 			indexOfMax = multipliers.valueOf().indexOf(maxActiveMultiplier);	
 		}
-		// console.log(multipliers);
 	}
 	console.log('regressors',regressors);
 	return regressors;
@@ -100,7 +102,6 @@ function pInv(matrix) {
 		else sInv[i] = 0;
 	}
 	if(n <= m) return numeric.dot(numeric.dot(V, numeric.diag(sInv)), numeric.transpose(U));
-	//AT = USVT => A = VSUT A+ = US+VT
 	else return numeric.dot(numeric.dot(U, numeric.diag(sInv)), numeric.transpose(V));
 	// A = USVT => A+ = VS+UT
 }
