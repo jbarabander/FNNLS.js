@@ -40,41 +40,47 @@ function NNLS(independentMatrix, dependentVector, tolerance) {
 	if(independentMatrix.length !== dependentVector.length){
 		throw new Error('independent matrix and dependent vector do not have same number of rows');	
 	}
-	var coefficients = math.matrix(independentMatrix);
-	var regressors = math.zeros(coefficients.size()[1]).valueOf();
-	var passiveSet = [];
-	var activeSet = arrayMath.range(0, regressors.length);
-	var multipliers = math.multiply(math.transpose(coefficients), math.subtract(dependentVector, math.multiply(coefficients, regressors)));
-	var activeMultipliers = math.subset(multipliers, math.index(activeSet));
-	var maxActiveMultiplier = math.max(activeMultipliers);
-	var indexOfMax = multipliers.valueOf().indexOf(maxActiveMultiplier);
-	var startingPassiveMatrix = math.matrix(math.zeros(coefficients.size()));
-	var rowRange = arrayMath.range(0, coefficients.size()[0]);
+	var coefficients = math.matrix(independentMatrix),
+	regressors = math.zeros(coefficients.size()[1]).valueOf(),
+	passiveSet = [],
+	activeSet = arrayMath.range(0, regressors.length),
+	multipliers = math.multiply(math.transpose(coefficients), math.subtract(dependentVector, math.multiply(coefficients, regressors))),
+	activeMultipliers = math.subset(multipliers, math.index(activeSet)),
+	maxActiveMultiplier = math.max(activeMultipliers),
+	indexOfMax = multipliers.valueOf().indexOf(maxActiveMultiplier),
+	startingPassiveMatrix = math.matrix(math.zeros(coefficients.size())),
+	rowRange = arrayMath.range(0, coefficients.size()[0]);
 	while(activeSet.length && maxActiveMultiplier > tolerance) {
 		passiveSet.push(activeSet.splice(activeSet.indexOf(indexOfMax),1)[0]);
 		var columnIndex = passiveSet.length === 1 ? passiveSet[0] : passiveSet;
 		var coefficientsP = startingPassiveMatrix.subset(math.index(rowRange, columnIndex),coefficients.subset(math.index(rowRange, columnIndex)));
-		var tCoefficientsP = math.transpose(coefficientsP);
 		var pseudoInv = pInv(coefficientsP.valueOf());
 		var sP = numeric.dot(pseudoInv, dependentVector);
-		console.log(sP);
 		while(math.min(sP.filter(function(element, index) {
 			return passiveSet.indexOf(index) !== -1;
 		})) <= 0) {
-			// var alpha = - math.min(passiveSet.map(function(element) {
-			// 	return regressors.valueOf()[element] / (regressors.valueOf()[element] - sP[element]);
-			// }));
-			// regressors = numeric.dot(alpha, numeric.sub(sP, regressors.valueOf()));
-			break;
+			console.log('in the inner loop');
+			var alpha = - math.min(passiveSet.map(function(element) {
+				return regressors.valueOf()[element] / (regressors.valueOf()[element] - sP[element]);
+			}));
+			regressors = numeric.dot(alpha, numeric.sub(sP, regressors));
+			for(var i = 0; i < regressors.length; i++) {
+				var indexInPassive = passiveSet.indexOf(i);
+				if(regressors[i] === 0 && indexInPassive !== -1) {
+					activeSet.push(passiveSet.splice(indexInPassive)[0]);
+				}
+			}
+			columnIndex = passiveSet.length === 1 ? passiveSet[0] : passiveSet;
+			coefficientsP = startingPassiveMatrix.subset(math.index(rowRange, columnIndex));
+			pseudoInv = pInv(coefficientsP.valueOf());
+			var sP = numeric.dot(pseudoInv, dependentVector);
 		}
 		regressors = sP;
 		multipliers = math.multiply(math.transpose(coefficients), math.subtract(dependentVector, math.multiply(coefficients, regressors)));
-		console.log(multipliers);
 		if(activeSet.length) {
 			activeMultipliers = math.subset(multipliers, math.index(activeSet));
 			maxActiveMultiplier = math.max(activeMultipliers);
-			// console.log('maxActiveMultiplier', maxActiveMultiplier);
-			indexOfMax = multipliers.valueOf().indexOf(maxActiveMultiplier);	
+			indexOfMax = multipliers.valueOf().indexOf(maxActiveMultiplier);
 		}
 	}
 	return regressors;
@@ -99,17 +105,8 @@ function pInv(matrix) {
 	// A = USVT => A+ = VS+UT
 }
 
-// function pinv(A) {
-//   var z = numeric.svd(A), foo = z.S[0];
-//   var U = z.U, S = z.S, V = z.V;
-//   var m = A.length, n = A[0].length, tol = Math.max(m,n)*numeric.epsilon*foo,M = S.length;
-//   var i,Sinv = new Array(M);
-//   for(i=M-1;i!==-1;i--) { if(S[i]>tol) Sinv[i] = 1/S[i]; else Sinv[i] = 0; }
-//   return numeric.dot(numeric.dot(V,numeric.diag(Sinv)),numeric.transpose(U))
-// }
-
-// NNLS([[1,5,2,9,6], [6,1,8,2,6], [2,4,2,5,7], [2,12,6,4,3], [12,19,3,5,10]], [1,11,20,12,34]);
-// NNLS([[2,-1], [-1,2], [-1,-1]], [-4,-9,-16]);
+// console.log(NNLS([[1,5,2,9,6], [6,1,8,2,6], [2,4,2,5,7], [2,12,6,4,3], [12,19,3,5,10]], [1,11,20,12,34]));
+// console.log(NNLS([[2,-1], [-1,2], [-1,-1]], [-4,-9,-16]));
 //FNNLS algorithm
 function FNNLS(coefficientMatrix, dependentVector) {
 
